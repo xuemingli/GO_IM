@@ -2,6 +2,12 @@ package model
 
 import "time"
 
+const (
+	SEX_WOMEN="W"
+	SEX_MEN="M"
+	SEX_UNKNOW="U"
+)
+
 type User struct {
 	Id         int64     `xorm:"pk autoincr bigint(64)" form:"id" json:"id"`
 	Mobile   string 		`xorm:"varchar(20)" form:"mobile" json:"mobile"`
