@@ -3,14 +3,14 @@
 
     function upload(dom){
         uploadfile("attach/upload",dom,function(res){
-            if(res.code==200){
+            if(res.code==0){
                 app.sendpicmsg(res.data)
             }
 
         })
     }
     function userId(){
-        return util.parseQuery("id")
+        return parseInt(util.parseQuery("id"))
     }
     var app=new Vue(
             {
@@ -105,12 +105,10 @@
                     if(!!user){
                         this.profile.avatar = user.avatar;
                         this.profile.nickname = user.nickname;
-
                         this.profile.memo = user.memo;
-                        var url="ws://"+location.host+"/chat?id="+userId()+"&token=" +user.token;
-                        this.webSocket=new WebSocket(url);
-                        this.initwebsocket()
                     }
+
+                    this.initwebsocket()
 
                 },
                 mounted:function(){
@@ -192,7 +190,7 @@
                         }
                         var that = this;
                         for(var id in res){
-                            console.log("res[i]",id,res[id])
+                            //console.log("res[i]",id,res[id])
                             post(res[id],{},function(pkginfo){
                                 //console.log("post res[i]",id,res[id],pkginfo)
                                 var baseurl= config.baseurl+"/"+pkginfo.id+"/"
@@ -258,24 +256,24 @@
                         this.webSocket.send(JSON.stringify(msg))
                     },
                     singlemsg:function(user){
-                        console.log(user)
+                        //console.log(user)
                         this.win = "single";
                         this.title = "和"+user.nickname+"聊天中";
-                        this.msgcontext.dstid = user.id;
+                        this.msgcontext.dstid = parseInt(user.id);
                         this.msgcontext.cmd = 10;
                     },
                     groupmsg:function(group){
 
                         this.win = "group";
                         this.title=group.name;
-                        this.msgcontext.dstid = group.id;
+                        this.msgcontext.dstid = parseInt(group.id);
                         this.msgcontext.cmd = 11;
                     },
                     loaduserinfo:function(userid,cb){
                         userid = ""+userid;
                         var userinfo = this.usermap[userid];
                         if(!userinfo){
-                            post("user/find",{id:userid},function(res){
+                            post("user/find",{id:parseInt(userid)},function(res){
                                 cb(res.data);
                                 this.usermap[userid] = res.data;
                             }.bind(this))
@@ -291,15 +289,28 @@
 
                     },
                     initwebsocket:function(){
+                        var url="ws://"+location.host+"/chat?id="+userId()+"&token=" +util.parseQuery("token");
+                        this.webSocket=new WebSocket(url);
+                        //消息处理
                         this.webSocket.onmessage = function(evt){
-                            this.onmessage(JSON.parse(evt.data));
+                            //{"data":"}",...}
+                            if(evt.data.indexOf("}")>-1){
+                                this.onmessage(JSON.parse(evt.data));
+                            }else{
+                                console.log("recv<=="+evt.data)
+                            }
                         }.bind(this)
+                        //关闭回调
                         this.webSocket.onclose=function (evt) {
                             console.log(evt.data)
                         }
+                        //出错回调
                         this.webSocket.onerror=function (evt) {
                             console.log(evt.data)
                         }
+                        /*{
+                            this.webSocket.send()
+                        }*/
                     },
                     sendmsg:function(){
 
@@ -388,7 +399,7 @@
                 },
                 watch:{
                     "win":function(n,o){
-                        console.log("watch",o,n)
+                       // console.log("watch",o,n)
                         if(n!="main"){
                             document.getElementById("menubar").style.display="none";
                         }else{

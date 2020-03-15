@@ -14,7 +14,7 @@
         <li class="chat " :class="item.ismine?'mine':'other'" v-for="item in msglist" v-if="item.msg.cmd==msgcontext.cmd && (( item.msg.cmd==10 &&  (item.ismine? item.msg.dstid==msgcontext.dstid : item.msg.dstid==msgcontext.userid )) || ( item.msg.cmd==11 &&  (item.msg.dstid==msgcontext.dstid))) ">
             
             <div >
-            <img class="avatar" :src="item.user.avatar" />
+            <img class="avatar" :src="item.user.avatar ||'/asset/images/avatar0.png'" />
         </div>
 
         <span ></span>
@@ -69,6 +69,7 @@
         </div>
     </div>
 </div>
+
 <div v-if="panelstat=='more'" class="plugins">
     <div class="plugin" @tap="dispatchplugin(item)" v-for="item in plugins">
         <img  :src="item.icon" />
